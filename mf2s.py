@@ -4,15 +4,18 @@ import os
 from time import sleep
 import utils
 
-def do():
-  user = os.environ["MF_ID"]
-  password = os.environ["MF_PASSWORD"]
-  driver = utils.login(user, password)
-  print(utils.balance(driver))
-  driver.get("https://moneyforward.com/cf/csv?year=2019&month=06")
-  sleep(10)
-  driver.quit()
-  return 1 
+class M():
+  def balance(driver):
+    print(utils.balance(driver))
+    driver.get("https://moneyforward.com/cf/csv?year=2019&month=06")
+    sleep(10)
+    driver.quit()
+    return 1
 
 if __name__ == '__main__':
-  sys.exit(do())
+    cls = sys.argv[1]
+    print(cls)
+    user = os.environ["MF_ID"]
+    password = os.environ["MF_PASSWORD"]
+    driver = utils.login(user, password)
+    sys.exit(getattr(M, cls)(driver))
