@@ -11,6 +11,9 @@ class M():
     sleep(10)
     driver.quit()
     return 1
+  def b_list(driver):
+    print(utils.b_list(driver))
+    return 1
 
 if __name__ == '__main__':
     cls = sys.argv[1]

@@ -47,3 +47,41 @@ def balance(driver):
   except ValueError:
       return None
   return account_dict
+
+def b_list(driver):
+  account_list = []
+  try:
+    driver.get("https://moneyforward.com/")
+    account_type = ""
+    l = driver.find_elements_by_css_selector(".facilities.accounts-list")[1]
+    for li in l.find_elements_by_tag_name('li'):
+        if li.get_attribute("class") == "heading-category-name heading-normal":
+            account_type = li.text
+        elif li.get_attribute("class") == "account facilities-column border-bottom-dotted":
+            account_name = li.find_element_by_tag_name("a").text
+            show_href = li.find_elements_by_tag_name("a")[0].get_attribute("href")
+            account_id = show_href.split("/show/")[1]
+            if account_type == "カード":
+                amount = show_href
+            else:
+                amount = li.find_element_by_class_name("amount").find_element_by_class_name("number").text
+            _dict = {
+                    "account_id": account_id,
+                    "name": account_name,
+                    "type": account_type,
+                    "amount": amount
+                    }
+            account_list.append(_dict)
+
+  except ValueError:
+      return None
+  for a in account_list:
+      if a["amount"][:4] == 'http':
+          driver.get(a["amount"])
+          h1s = [h for h in driver.find_elements_by_tag_name("h1") if h.text[:4] == "負債総額"]
+          if len(h1s) == 1:
+              a["amount"] = h1s[0].text.split(" ")[1]
+              continue
+          a["amount"] = driver.find_element_by_id("TABLE_3").find_element_by_class_name("number").text
+  return account_list
+
