@@ -3,6 +3,7 @@ import sys
 import os
 from time import sleep
 import utils
+import store
 
 class M():
   def balance(driver):
@@ -21,4 +22,7 @@ if __name__ == '__main__':
     user = os.environ["MF_ID"]
     password = os.environ["MF_PASSWORD"]
     driver = utils.login(user, password)
-    sys.exit(getattr(M, cls)(driver))
+    result = getattr(utils, cls)(driver)
+    driver.quit()
+    store.persist(result, cls)
+    sys.exit()
