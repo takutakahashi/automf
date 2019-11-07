@@ -1,12 +1,16 @@
 # coding: UTF-8
 from selenium import webdriver
+from selenium.webdriver.firefox.options import Options
 from time import sleep
 
 def login(user, password):
   surl = "https://moneyforward.com/users/sign_in"
 
   try:
-    driver = webdriver.Chrome('chromedriver')
+    # driver = webdriver.Chrome('chromedriver')
+    options = Options()
+    options.add_argument('-headless')
+    driver = webdriver.Firefox(firefox_options=options)
     driver.implicitly_wait(10)
     driver.get(surl)
   
