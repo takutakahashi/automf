@@ -7,7 +7,6 @@ def login(user, password):
   surl = "https://moneyforward.com/users/sign_in"
 
   try:
-    # driver = webdriver.Chrome('chromedriver')
     options = Options()
     options.add_argument('-headless')
     driver = webdriver.Firefox(firefox_options=options)
@@ -24,6 +23,7 @@ def login(user, password):
     elem = driver.find_element_by_id("login-btn-sumit")
     elem.click()
     sleep(3)
+    reload(driver)
   except ValueError:
       return None
   return driver
@@ -33,6 +33,11 @@ def reload(driver):
     for e in driver.find_elements_by_css_selector(".refresh.btn.icon-refresh"):
         if e.text == "一括更新":
             e.click()
+    while True:
+        length = len([l for l in driver.find_elements_by_tag_name("li") if l.text == "更新中"])
+        if length == 0:
+            break
+        sleep(10)
     return
 
 
