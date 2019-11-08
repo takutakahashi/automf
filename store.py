@@ -1,2 +1,3 @@
 def persist(dct, cls):
-    print(dct)
+    with open("/mnt/{}.txt".format(cls), 'a') as f:
+        f.write(dct)
