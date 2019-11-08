@@ -28,6 +28,14 @@ def login(user, password):
       return None
   return driver
 
+def reload(driver):
+    driver.get("https://moneyforward.com/")
+    for e in driver.find_elements_by_css_selector(".refresh.btn.icon-refresh"):
+        if e.text == "一括更新":
+            e.click()
+    return
+
+
 def balance(driver):
   account_dict = {}
   try:
