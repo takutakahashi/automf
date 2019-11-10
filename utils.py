@@ -2,6 +2,7 @@
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from time import sleep
+import datetime
 
 def login(user, password):
   surl = "https://moneyforward.com/users/sign_in"
@@ -66,7 +67,7 @@ def balance(driver):
   return account_dict
 
 def b_list(driver):
-  account_list = []
+  account_list = [datetime.datetime.now().strftime('%Y/%m/%d %H:%M')]
   try:
     driver.get("https://moneyforward.com/")
     account_type = ""
