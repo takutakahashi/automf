@@ -2,7 +2,7 @@
 from crontab import CronTab
 
 if __name__ == '__main__':
-    tasks = ['b_list', 'b_list']
+    tasks = ['b_list']
     cron = CronTab()
     i = 0
     for task in tasks:
