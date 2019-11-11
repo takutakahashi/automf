@@ -1,2 +1,5 @@
+python-crontab==2.4.0
+python-dateutil==2.8.1
 selenium==3.141.0
+six==1.13.0
 urllib3==1.25.3

@@ -1,0 +1,2 @@
+0 13 * * * python3 mf.py b_list
+1 13 * * * python3 mf.py b_list
