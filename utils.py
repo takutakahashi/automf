@@ -67,7 +67,7 @@ def balance(driver):
   return account_dict
 
 def b_list(driver):
-  account_list = [datetime.datetime.now().strftime('%Y/%m/%d %H:%M')]
+  account_list = []
   try:
     driver.get("https://moneyforward.com/")
     account_type = ""
@@ -101,5 +101,6 @@ def b_list(driver):
               a["amount"] = h1s[0].text.split(" ")[1]
               continue
           a["amount"] = driver.find_element_by_id("TABLE_3").find_element_by_class_name("number").text
+  account_list.insert(0, datetime.datetime.now().strftime('%Y/%m/%d %H:%M'))
   return account_list
 
