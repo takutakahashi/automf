@@ -2,7 +2,6 @@
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from time import sleep
-import datetime
 
 def login(user, password):
   surl = "https://moneyforward.com/users/sign_in"
@@ -101,6 +100,5 @@ def b_list(driver):
               a["amount"] = h1s[0].text.split(" ")[1]
               continue
           a["amount"] = driver.find_element_by_id("TABLE_3").find_element_by_class_name("number").text
-  account_list.insert(0, datetime.datetime.now().strftime('%Y/%m/%d %H:%M'))
   return account_list
 
