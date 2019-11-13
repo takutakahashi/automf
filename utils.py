@@ -102,3 +102,9 @@ def b_list(driver):
           a["amount"] = driver.find_element_by_id("TABLE_3").find_element_by_class_name("number").text
   return account_list
 
+def add(driver, add_type=None, member=None, item=None, amount=None, comment=None):
+    if None in [add_type, member, item, amount]:
+        return False
+    driver.get("https://moneyforward.com")
+    driver.find_element_by_id("js-large-category-selected").click()
+    li = driver.find_element_by_css_selector(".dropdown-menu.main_menu.minus")
