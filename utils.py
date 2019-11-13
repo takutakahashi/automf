@@ -8,7 +8,7 @@ def login(user, password, force_reload=False):
 
   try:
     options = Options()
-    # options.add_argument('-headless')
+    options.add_argument('-headless')
     driver = webdriver.Firefox(firefox_options=options)
     driver.implicitly_wait(10)
     driver.get(surl)
