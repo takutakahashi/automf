@@ -83,7 +83,7 @@ def add(driver, add_type=None, member=None, item=None, amount=None, comment=None
         return False
     if comment is None:
         comment = ""
-    add_type = {"outgoing": "important", "income": "info"}[add_type]
+    add_type = {"expense": "important", "income": "info"}[add_type]
     large_item, middle_item = item.split("/")
     driver.get("https://moneyforward.com/cf")
     driver.find_element_by_css_selector(".cf-new-btn.btn.modal-switch.btn-warning").click()
