@@ -8,5 +8,5 @@ def persist(dct, cls):
         os.makedirs("/mnt/{}".format(cls))
     except FileExistsError:
         pass
-    with open("/mnt/{}/{}.txt".format(cls, datetime.datetime.now().strftime('%Y%m%d%H%M')), 'a') as f:
+    with open("/mnt/{}/{}.txt".format(cls, datetime.datetime.now().strftime('%Y%m%d')), 'w') as f:
         f.write(str(dct))
