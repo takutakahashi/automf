@@ -3,12 +3,12 @@ from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from time import sleep
 
-def login(user, password):
+def login(user, password, force_reload=False):
   surl = "https://moneyforward.com/users/sign_in"
 
   try:
     options = Options()
-    options.add_argument('-headless')
+    # options.add_argument('-headless')
     driver = webdriver.Firefox(firefox_options=options)
     driver.implicitly_wait(10)
     driver.get(surl)
@@ -23,7 +23,8 @@ def login(user, password):
     elem = driver.find_element_by_id("login-btn-sumit")
     elem.click()
     sleep(3)
-    reload(driver)
+    if force_reload:
+      reload(driver)
   except ValueError:
       return None
   return driver
@@ -40,32 +41,7 @@ def reload(driver):
         sleep(10)
     return
 
-
 def balance(driver):
-  account_dict = {}
-  try:
-    driver.get("https://moneyforward.com/accounts")
-    for t in driver.find_elements_by_id("registration-table"):
-        cls = t.get_attribute("class")
-        if cls == "real-estate-property-accounts":
-            break
-        elif cls == "manual_accounts":
-            path = "/accounts/show_manual"
-        else:
-            path = "/accounts/show"
-        for tr in t.find_elements_by_tag_name("tr"):
-            account_id = tr.get_attribute("id")
-            if len(account_id) != 0:
-              name = tr.find_element_by_xpath("//a[@href='{}/{}']".format(path, account_id)).text
-              num = tr.find_element_by_class_name("number").text
-              if len(num) == 0:
-                  num = '0円'
-              account_dict[name] = int(num.replace("円", "").replace(",", ""))
-  except ValueError:
-      return None
-  return account_dict
-
-def b_list(driver):
   account_list = []
   try:
     driver.get("https://moneyforward.com/")
@@ -105,6 +81,23 @@ def b_list(driver):
 def add(driver, add_type=None, member=None, item=None, amount=None, comment=None):
     if None in [add_type, member, item, amount]:
         return False
-    driver.get("https://moneyforward.com")
+    if comment is None:
+        comment = ""
+    add_type = {"outgoing": "important", "income": "info"}[add_type]
+    large_item, middle_item = item.split("/")
+    driver.get("https://moneyforward.com/cf")
+    driver.find_element_by_css_selector(".cf-new-btn.btn.modal-switch.btn-warning").click()
+    sleep(1)
+    driver.find_element_by_class_name("tab-menu").find_element_by_id(add_type).click()
+    driver.find_element_by_id("appendedPrependedInput").send_keys(amount)
+    s = driver.find_element_by_id("user_asset_act_sub_account_id_hash")
+    s.click()
+    [opt for opt in s.find_elements_by_tag_name("option") if member in opt.text].pop().click()
     driver.find_element_by_id("js-large-category-selected").click()
     li = driver.find_element_by_css_selector(".dropdown-menu.main_menu.minus")
+    [a for a in li.find_elements_by_class_name("l_c_name") if a.text == large_item].pop().click()
+    driver.find_element_by_id("js-middle-category-selected").click()
+    li = driver.find_element_by_css_selector(".dropdown-menu.sub_menu")
+    [a for a in li.find_elements_by_class_name("m_c_name") if a.text == middle_item].pop().click()
+    driver.find_element_by_id("js-content-field").send_keys("[{}] {}".format(member, comment))
+    driver.find_element_by_id("submit-button").click()
