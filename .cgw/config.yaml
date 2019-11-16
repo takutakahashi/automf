@@ -1,0 +1,24 @@
+host: "0.0.0.0"
+endpoints:
+ - path: /add
+   method: POST
+   async: true
+   env:
+   - MF_ID
+   - MF_PASSWORD
+   params:
+   - name: add_type
+   - name: member
+   - name: item
+   - name: amount
+   - name: comment
+     optional: true
+   container:
+     image: takutakahashi/automf
+     command:
+      - add
+      - "{{ add_type }}"
+      - "{{ member }}"
+      - "{{ item }}"
+      - "{{ amount }}"
+      - "{{ comment }}"
