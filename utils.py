@@ -78,11 +78,16 @@ def balance(driver):
           a["amount"] = driver.find_element_by_id("TABLE_3").find_element_by_class_name("number").text
   return account_list
 
-def add(driver, add_type=None, member=None, item=None, amount=None, comment=None):
+def add(driver, args=[]):
+    if len(args) < 5:
+        args.append(None)
+    add_type, member, item, amount, comment = args
     if None in [add_type, member, item, amount]:
         return False
-    if comment is None:
+    if comment == None:
         comment = ""
+    else:
+        comment = args[4]
     add_type = {"expense": "important", "income": "info"}[add_type]
     large_item, middle_item = item.split("/")
     driver.get("https://moneyforward.com/cf")
