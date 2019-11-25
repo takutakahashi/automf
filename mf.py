@@ -3,10 +3,12 @@ import sys
 import os
 import utils
 import store
+import parser
 
 if __name__ == '__main__':
-    cls = sys.argv[1]
-    args = sys.argv[2:]
+    args = parser.get_args()
+    cls = args.func
+    print(args.add_type)
     must_reload = ["balance"]
     user = os.environ["MF_ID"]
     password = os.environ["MF_PASSWORD"]
@@ -14,7 +16,7 @@ if __name__ == '__main__':
     driver = utils.login(user, password,
             force_reload=(cls in must_reload))
     print("login success")
-    result = getattr(utils, cls)(driver, args=args)
+    result = getattr(utils, cls)(driver, args)
     driver.quit()
     store.persist(result, cls)
     sys.exit()

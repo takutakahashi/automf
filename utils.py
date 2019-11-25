@@ -85,17 +85,17 @@ def balance(driver, args=None):
           a["amount"] = driver.find_element_by_id("TABLE_3").find_element_by_class_name("number").text
   return account_list
 
-def add(driver, args=[]):
+def add(driver, args):
+    add_type = args.add_type
+    member = args.member
+    item = args.item
+    amount = args.amount
+    comment = args.comment
     print("start add")
-    if len(args) < 5:
-        args.append(None)
-    add_type, member, item, amount, comment = args
     if None in [add_type, member, item, amount]:
         return False
     if comment == None:
         comment = ""
-    else:
-        comment = args[4]
     add_type = {"expense": "important", "income": "info"}[add_type]
     print("add_type: {}".format(add_type))
     large_item, middle_item = item.split("/")
