@@ -32,6 +32,14 @@ def login(user, password, force_reload=False):
       return None
   return driver
 
+def set_group(driver, group):
+    print("set {}".format(group))
+    driver.get("https://moneyforward.com/")
+    s = driver.find_element_by_id("group_id_hash")
+    s.click()
+    [o for o in s.find_elements_by_tag_name("option") if group == o.text].pop().click()
+    return
+
 def reload(driver):
     driver.get("https://moneyforward.com/")
     for e in driver.find_elements_by_css_selector(".refresh.btn.icon-refresh"):

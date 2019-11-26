@@ -16,6 +16,7 @@ if __name__ == '__main__':
     driver = utils.login(user, password,
             force_reload=(cls in must_reload))
     print("login success")
+    utils.set_group(driver, args.group)
     result = getattr(utils, cls)(driver, args)
     driver.quit()
     store.persist(result, cls)
