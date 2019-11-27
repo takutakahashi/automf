@@ -32,8 +32,9 @@ def login(user, password, force_reload=False):
       return None
   return driver
 
-def set_group(driver, group):
-    print("set {}".format(group))
+def set_group(driver, group=None):
+    if not group:
+        return
     driver.get("https://moneyforward.com/")
     s = driver.find_element_by_id("group_id_hash")
     s.click()
