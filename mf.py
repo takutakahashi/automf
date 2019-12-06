@@ -9,7 +9,7 @@ if __name__ == '__main__':
     args = parser.get_args()
     cls = args.func
     print(args.add_type)
-    must_reload = ["balance"]
+    must_reload = []
     user = os.environ["MF_ID"]
     password = os.environ["MF_PASSWORD"]
     print("start login")

@@ -41,7 +41,7 @@ def set_group(driver, group=None):
     [o for o in s.find_elements_by_tag_name("option") if group == o.text].pop().click()
     return
 
-def reload(driver):
+def reload(driver, args=None):
     driver.get("https://moneyforward.com/")
     for e in driver.find_elements_by_css_selector(".refresh.btn.icon-refresh"):
         if e.text == "一括更新":
