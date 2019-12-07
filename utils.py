@@ -2,6 +2,7 @@
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from time import sleep
+import os
 
 def login(user, password, force_reload=False):
   surl = "https://moneyforward.com/users/sign_in"
@@ -17,15 +18,15 @@ def login(user, password, force_reload=False):
     elem = driver.find_element_by_id("sign_in_session_service_email")
     elem.clear()
     elem.send_keys(user)
-    print("email sent")
+    debug("email sent")
     elem = driver.find_element_by_id("sign_in_session_service_password")
-    print("assword sent")
+    debug("assword sent")
     elem.clear()
     elem.send_keys(password)
     elem = driver.find_element_by_id("login-btn-sumit")
     elem.click()
     sleep(3)
-    print("login successful")
+    debug("login successful")
     if force_reload:
       reload(driver)
   except ValueError:
@@ -46,22 +47,22 @@ def reload(driver, args=None):
     for e in driver.find_elements_by_css_selector(".refresh.btn.icon-refresh"):
         if e.text == "一括更新":
             e.click()
-            print("reload clicked")
+            debug("reload clicked")
     while True:
         length = len([l for l in driver.find_elements_by_tag_name("li") if l.text == "更新中"])
         if length == 0:
             break
-        print("sleep...")
+        debug("sleep...")
         sleep(10)
     return
 
 def balance(driver, args=None):
   account_list = []
-  print("start getting balance")
+  debug("start getting balance")
   try:
     driver.get("https://moneyforward.com/")
     account_type = ""
-    print("fetch account list")
+    debug("fetch account list")
     l = driver.find_elements_by_css_selector(".facilities.accounts-list")[1]
     for li in l.find_elements_by_tag_name('li'):
         if li.get_attribute("class") == "heading-category-name heading-normal":
@@ -100,24 +101,24 @@ def add(driver, args):
     item = args.item
     amount = args.amount
     comment = args.comment
-    print("start add")
+    debug("start add")
     if None in [add_type, member, item, amount]:
         return False
     if comment == None:
         comment = ""
     add_type = {"expense": "important", "income": "info"}[add_type]
-    print("add_type: {}".format(add_type))
+    debug("add_type: {}".format(add_type))
     large_item, middle_item = item.split("/")
-    print("load cf")
+    debug("load cf")
     driver.get("https://moneyforward.com/cf")
-    print("loaded")
+    debug("loaded")
     driver.find_element_by_css_selector(".cf-new-btn.btn.modal-switch.btn-warning").click()
-    print("create button pressed")
+    debug("create button pressed")
     sleep(1)
     driver.find_element_by_class_name("tab-menu").find_element_by_id(add_type).click()
-    print("tab pressed")
+    debug("tab pressed")
     driver.find_element_by_id("appendedPrependedInput").send_keys(amount)
-    print("ammount sent")
+    debug("ammount sent")
     s = driver.find_element_by_id("user_asset_act_sub_account_id_hash")
     s.click()
     [opt for opt in s.find_elements_by_tag_name("option") if member in opt.text].pop().click()
@@ -127,8 +128,12 @@ def add(driver, args):
     driver.find_element_by_id("js-middle-category-selected").click()
     li = driver.find_element_by_css_selector(".dropdown-menu.sub_menu")
     [a for a in li.find_elements_by_class_name("m_c_name") if a.text == middle_item].pop().click()
-    print("category selected")
+    debug("category selected")
     driver.find_element_by_id("js-content-field").send_keys("[{}] {}".format(member, comment))
-    print("comment sent")
+    debug("comment sent")
     driver.find_element_by_id("submit-button").click()
-    print("end")
+    debug("end")
+
+def debug(s):
+    if os.environ.get("DEBUG") == "true":
+        print(s)
