@@ -9,7 +9,7 @@ def login(user, password, force_reload=False):
 
   try:
     options = Options()
-    options.add_argument('-headless')
+    # options.add_argument('-headless')
     driver = webdriver.Firefox(firefox_options=options)
     driver.implicitly_wait(10)
     driver.get(surl)
@@ -55,6 +55,35 @@ def reload(driver, args=None):
         debug("sleep...")
         sleep(10)
     return
+
+def _detail(driver, account_name):
+  driver.get("https://moneyforward.com/")
+  l = driver.find_elements_by_css_selector(".facilities.accounts-list")[0]
+  for li in l.find_elements_by_tag_name('li'):
+      if li.get_attribute("class") == "account facilities-column border-bottom-dotted" and li.find_element_by_tag_name("a").text == account_name:
+          show_href = li.find_elements_by_tag_name("a")[0].get_attribute("href")
+          return show_href
+
+def clean(driver, args):
+    member = args.member
+    amount_delta = args.amount
+    if None in [member, amount_delta]:
+        return False
+    driver.get(_detail(driver, member))
+    [b for b in driver.find_elements_by_css_selector(".btn.btn-success") if b.text == "残高修正"].pop().click()
+    sleep(2)
+    a_str = driver.find_element_by_css_selector("span.control-label").text[:-1]
+    before_amount = int(a_str)
+    if before_amount >= 0:
+        amount = before_amount - int(amount_delta)
+    else:
+        amount = before_amount + int(amount_delta)
+    driver.find_element_by_id("rollover_info_value").send_keys(amount)
+    c = driver.find_element_by_id("rollover_info_transaction_flag")
+    if c.is_selected():
+        c.click()
+    [b for b in driver.find_elements_by_name("commit") if b.get_attribute("value") == "この内容で登録する"].pop().click()
+    return {"before": before_amount, "after": amount}
 
 def balance(driver, args=None):
   account_list = []
