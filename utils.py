@@ -85,25 +85,30 @@ def clean(driver, args):
     [b for b in driver.find_elements_by_name("commit") if b.get_attribute("value") == "この内容で登録する"].pop().click()
     return {"before": before_amount, "after": amount}
 
-def balance(driver, args=None):
+def wallets(driver, args=None):
+    return balance(driver, args, 0)
+
+
+def balance(driver, args=None, index=1):
   account_list = []
+  delimiter = ["/show_manual/", "/show/"]
   debug("start getting balance")
   try:
     driver.get("https://moneyforward.com/")
     account_type = ""
     debug("fetch account list")
-    l = driver.find_elements_by_css_selector(".facilities.accounts-list")[1]
+    l = driver.find_elements_by_css_selector(".facilities.accounts-list")[index]
     for li in l.find_elements_by_tag_name('li'):
         if li.get_attribute("class") == "heading-category-name heading-normal":
             account_type = li.text
         elif li.get_attribute("class") == "account facilities-column border-bottom-dotted":
             account_name = li.find_element_by_tag_name("a").text
             show_href = li.find_elements_by_tag_name("a")[0].get_attribute("href")
-            account_id = show_href.split("/show/")[1]
+            account_id = show_href.split(delimiter[index])[1]
             if account_type == "カード":
                 amount = show_href
             else:
-                amount = li.find_element_by_class_name("amount").find_element_by_class_name("number").text
+                amount = li.find_element_by_class_name("number").text
             _dict = {
                     "account_id": account_id,
                     "name": account_name,
