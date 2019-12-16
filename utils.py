@@ -85,11 +85,14 @@ def clean(driver, args):
     [b for b in driver.find_elements_by_name("commit") if b.get_attribute("value") == "この内容で登録する"].pop().click()
     return {"before": before_amount, "after": amount}
 
+def balance(driver, args=None):
+    return _balance(driver, args, 0) + _balance(driver, args, 1)
+
 def wallets(driver, args=None):
     return balance(driver, args, 0)
 
 
-def balance(driver, args=None, index=1):
+def _balance(driver, args=None, index=1):
   account_list = []
   delimiter = ["/show_manual/", "/show/"]
   debug("start getting balance")
