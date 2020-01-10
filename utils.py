@@ -56,6 +56,15 @@ def reload(driver, args=None):
         sleep(10)
     return
 
+def _portfolio(driver, account_id):
+    driver.get("https://moneyforward.com/accounts/show/{}".format(account_id))
+    portfolio_section = driver.find_element_by_id("portfolio_det_mf")
+
+    theader = portfolio_section.find_element_by_tag_name("thead").find_elements_by_tag_name("th")
+    tbody = portfolio_section.find_element_by_tag_name("tbody").find_elements_by_tag_name("tr")
+    header = [t.text for t in theader]
+    return [ { header[i]: content.text for i, content in enumerate(t.find_elements_by_tag_name("td"))} for t in tbody]
+
 def _detail(driver, account_name):
   driver.get("https://moneyforward.com/")
   l = driver.find_elements_by_css_selector(".facilities.accounts-list")[0]
@@ -89,7 +98,7 @@ def balance(driver, args=None):
     return _balance(driver, args, 0) + _balance(driver, args, 1)
 
 def wallets(driver, args=None):
-    return balance(driver, args, 0)
+    return _balance(driver, args, 0)
 
 
 def _balance(driver, args=None, index=1):
