@@ -155,6 +155,10 @@ def add(driver, args):
         return False
     if comment == None:
         comment = ""
+    category_type = {
+            "expense": ".dropdown-menu.main_menu.minus",
+            "income": ".dropdown-menu.main_menu.plus"
+            }[add_type]
     add_type = {"expense": "important", "income": "info"}[add_type]
     debug("add_type: {}".format(add_type))
     large_item, middle_item = item.split("/")
@@ -172,7 +176,7 @@ def add(driver, args):
     s.click()
     [opt for opt in s.find_elements_by_tag_name("option") if member in opt.text].pop().click()
     driver.find_element_by_id("js-large-category-selected").click()
-    li = driver.find_element_by_css_selector(".dropdown-menu.main_menu.minus")
+    li = driver.find_element_by_css_selector(category_type)
     [a for a in li.find_elements_by_class_name("l_c_name") if a.text == large_item].pop().click()
     driver.find_element_by_id("js-middle-category-selected").click()
     li = driver.find_element_by_css_selector(".dropdown-menu.sub_menu")
