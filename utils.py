@@ -66,6 +66,15 @@ def reload(driver, args=None):
         sleep(10)
     return
 
+def _portfolio(driver, account_id):
+    driver.get("https://moneyforward.com/accounts/show/{}".format(account_id))
+    portfolio_section = driver.find_element_by_id("portfolio_det_mf")
+
+    theader = portfolio_section.find_element_by_tag_name("thead").find_elements_by_tag_name("th")
+    tbody = portfolio_section.find_element_by_tag_name("tbody").find_elements_by_tag_name("tr")
+    header = [t.text for t in theader]
+    return [ { header[i]: content.text for i, content in enumerate(t.find_elements_by_tag_name("td"))} for t in tbody]
+
 def _detail(driver, account_name):
   driver.get("https://moneyforward.com/")
   l = driver.find_elements_by_css_selector(".facilities.accounts-list")[0]
@@ -95,11 +104,14 @@ def clean(driver, args):
     [b for b in driver.find_elements_by_name("commit") if b.get_attribute("value") == "この内容で登録する"].pop().click()
     return {"before": before_amount, "after": amount}
 
+def balance(driver, args=None):
+    return _balance(driver, args, 0) + _balance(driver, args, 1)
+
 def wallets(driver, args=None):
-    return balance(driver, args, 0)
+    return _balance(driver, args, 0)
 
 
-def balance(driver, args=None, index=1):
+def _balance(driver, args=None, index=1):
   account_list = []
   delimiter = ["/show_manual/", "/show/"]
   debug("start getting balance")
@@ -194,6 +206,10 @@ def add(driver, args):
         return False
     if comment == None:
         comment = ""
+    category_type = {
+            "expense": ".dropdown-menu.main_menu.minus",
+            "income": ".dropdown-menu.main_menu.plus"
+            }[add_type]
     add_type = {"expense": "important", "income": "info"}[add_type]
     debug("add_type: {}".format(add_type))
     large_item, middle_item = item.split("/")
@@ -211,7 +227,7 @@ def add(driver, args):
     s.click()
     [opt for opt in s.find_elements_by_tag_name("option") if member in opt.text].pop().click()
     driver.find_element_by_id("js-large-category-selected").click()
-    li = driver.find_element_by_css_selector(".dropdown-menu.main_menu.minus")
+    li = driver.find_element_by_css_selector(category_type)
     [a for a in li.find_elements_by_class_name("l_c_name") if a.text == large_item].pop().click()
     driver.find_element_by_id("js-middle-category-selected").click()
     li = driver.find_element_by_css_selector(".dropdown-menu.sub_menu")
