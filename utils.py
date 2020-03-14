@@ -2,14 +2,24 @@
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from time import sleep
+import re
 import os
+
+def to_sub(s):
+    return re.match("[-\d,.]+",s).group()
+
+def to_yen(s):
+    return int(to_sub(s).replace(",", ""))
+
+def to_f(s):
+    return float(to_sub(s))
 
 def login(user, password, force_reload=False):
   surl = "https://moneyforward.com/users/sign_in"
 
   try:
     options = Options()
-    options.add_argument('-headless')
+    #options.add_argument('-headless')
     driver = webdriver.Firefox(firefox_options=options)
     driver.implicitly_wait(10)
     driver.get(surl)
@@ -131,6 +141,47 @@ def balance(driver, args=None, index=1):
           a["amount"] = int(a["amount"].replace(",","").replace("円", ""))
 
   return account_list
+
+def investments(driver, args=None):
+    account_list = []
+    try:
+      driver.get("https://moneyforward.com/")
+      account_type = ""
+      l = driver.find_elements_by_css_selector(".facilities.accounts-list")[1]
+      for li in l.find_elements_by_tag_name('li'):
+          if li.get_attribute("class") == "heading-category-name heading-normal":
+              account_type = li.text
+          elif li.get_attribute("class") == "account facilities-column border-bottom-dotted":
+              if account_type != "証券":
+                  continue
+              account_name = li.find_element_by_tag_name("a").text
+              show_href = li.find_elements_by_tag_name("a")[0].get_attribute("href")
+              account_id = show_href.split("/show/")[1]
+              amount = li.find_element_by_class_name("number").text
+              _dict = {
+                      "account_id": account_id,
+                      "name": account_name,
+                      "type": account_type,
+                      "amount": amount
+                      }
+              account_list.append(_dict)
+    except ValueError:
+        return None
+    for a in account_list:
+        a["details"] = []
+        driver.get("https://moneyforward.com/accounts/show/{}".format(a["account_id"]))
+        investment_table = driver.find_element_by_css_selector(".table.table-bordered.table-mf")
+        body = investment_table.find_element_by_tag_name("tbody")
+        for tr in body.find_elements_by_tag_name("tr"):
+            tds = tr.find_elements_by_tag_name("td")
+            a["details"].append({
+                    "product_name": tds[0].text,
+                    "base_price": to_yen(tds[3].text),
+                    "amount": to_yen(tds[4].text),
+                    "profit": to_yen(tds[6].text),
+                    "profit_percentage": to_f(tds[7].text),
+                    })
+    return account_list
 
 def add(driver, args):
     add_type = args.add_type
