@@ -14,12 +14,16 @@ def to_yen(s):
 def to_f(s):
     return float(to_sub(s))
 
+def test(driver, args):
+    return _portfolio(driver, "q8yTAb5dxyTJmbnyWqri3Q")
+
 def login(user, password, force_reload=False):
   surl = "https://moneyforward.com/users/sign_in"
 
   try:
     options = Options()
-    options.add_argument('-headless')
+    if not os.environ.get("DISABLE_HEADLESS"):
+      options.add_argument('-headless')
     driver = webdriver.Firefox(firefox_options=options)
     driver.implicitly_wait(10)
     driver.get(surl)
@@ -65,6 +69,7 @@ def reload(driver, args=None):
         debug("sleep...")
         sleep(10)
     return
+
 
 def _portfolio(driver, account_id):
     driver.get("https://moneyforward.com/accounts/show/{}".format(account_id))
