@@ -200,7 +200,7 @@ def investments(driver, args=None):
                     "account_id": a["account_id"],
                     "name": a["name"],
                     "type": tds[0].text,
-                    "amount": to_yen(tds[6].text),
+                    "amount": -to_yen(tds[6].text),
                     })
     return result_list
 
