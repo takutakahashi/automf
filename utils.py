@@ -188,6 +188,7 @@ def investments(driver, args=None):
               account_list.append(_dict)
     except ValueError:
         return None
+    result_list = []
     for a in account_list:
         a["details"] = []
         driver.get("https://moneyforward.com/accounts/show/{}".format(a["account_id"]))
@@ -195,14 +196,13 @@ def investments(driver, args=None):
         body = investment_table.find_element_by_tag_name("tbody")
         for tr in body.find_elements_by_tag_name("tr"):
             tds = tr.find_elements_by_tag_name("td")
-            a["details"].append({
-                    "product_name": tds[0].text,
-                    "base_price": to_yen(tds[3].text),
-                    "amount": to_yen(tds[4].text),
-                    "profit": to_yen(tds[6].text),
-                    "profit_percentage": to_f(tds[7].text),
+            result_list.append({
+                    "account_id": a["account_id"],
+                    "name": a["name"],
+                    "type": tds[0].text,
+                    "amount": to_yen(tds[6].text),
                     })
-    return account_list
+    return result_list
 
 def add(driver, args):
     add_type = args.add_type
