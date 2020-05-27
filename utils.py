@@ -66,12 +66,6 @@ def reload(driver, args=None):
         if e.text == "一括更新":
             e.click()
             debug("reload clicked")
-    while True:
-        length = len([l for l in driver.find_elements_by_tag_name("li") if l.text == "更新中"])
-        if length == 0:
-            break
-        debug("sleep...")
-        sleep(10)
     return
 
 
