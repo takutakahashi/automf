@@ -18,7 +18,7 @@ def test(driver, args):
     return _portfolio(driver, "q8yTAb5dxyTJmbnyWqri3Q")
 
 def login(user, password, force_reload=False):
-  surl = "https://moneyforward.com/users/sign_in"
+  surl = "https://moneyforward.com/sign_in"
 
   try:
     options = Options()
@@ -29,7 +29,7 @@ def login(user, password, force_reload=False):
     driver.get(surl)
   
     # login
-    elem = driver.find_element_by_css_selector("._2YH0UDm8.ssoLink")
+    elem = driver.find_element_by_css_selector("._2sZu7ciR.ssoText")
     elem.click()
     elem = driver.find_element_by_css_selector("._2mGdHllU.inputItem")
     elem.clear()
