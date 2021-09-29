@@ -1,0 +1,27 @@
+on:
+  push:
+    branches:
+    - master
+
+name: Upload Release Asset
+
+jobs:
+  build:
+    name: Upload Release Asset
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: ghcr.io/takutakahashi/automf
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Login to ghcr.io
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: takutakahashi
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: 'Build:image'
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: ghcr.io/${{ steps.branch_name.outputs.IMAGE_NAME }}:latest
