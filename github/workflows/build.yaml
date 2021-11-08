@@ -1,0 +1,35 @@
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+name: Upload Release Asset
+
+jobs:
+  build:
+    name: Upload Release Asset
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: takutakahashi/autobuy
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Branch name
+        id: branch_name
+        run: |
+          echo ::set-output name=SOURCE_NAME::${GITHUB_REF#refs/*/}
+          echo ::set-output name=SOURCE_BRANCH::${GITHUB_REF#refs/heads/}
+          echo ::set-output name=SOURCE_TAG::${GITHUB_REF#refs/tags/}
+          echo ::set-output name=IMAGE_NAME::${IMAGE_NAME}
+      - name: Login to ghcr.io
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: takutakahashi
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: 'Build:image'
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: ghcr.io/${{ steps.branch_name.outputs.IMAGE_NAME }}:${{ steps.branch_name.outputs.SOURCE_TAG }}
