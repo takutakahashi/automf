@@ -1,6 +1,7 @@
 # coding: UTF-8
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
+from selenium.common.exceptions import NoSuchElementException
 from time import sleep
 import re
 import os
@@ -138,12 +139,14 @@ def _balance(driver, args=None, index=1):
                     "account_id": account_id,
                     "name": account_name,
                     "type": account_type,
-                    "amount": amount
+                    "amount": amount,
+                    "profit": 0
                     }
             account_list.append(_dict)
 
   except ValueError:
       return None
+  result_account_list = []
   for a in account_list:
       if a["amount"][:4] == 'http':
           driver.get(a["amount"])
@@ -154,12 +157,14 @@ def _balance(driver, args=None, index=1):
           a["amount"] = int(driver.find_element_by_id("TABLE_3").find_element_by_class_name("number").text.replace(",","").replace("円", ""))
       else:
           a["amount"] = int(a["amount"].replace(",","").replace("円", ""))
-
-  return account_list
+      if a["type"] == "証券":
+        result_account_list.extend(_investment(driver, a))
+      else:
+        result_account_list.append(a)
+  return result_account_list
 
 def _investment(driver, a):
     result_list = []
-    a["details"] = []
     driver.get("https://moneyforward.com/accounts/show/{}".format(a["account_id"]))
     # cash table
     cash_table = driver.find_element_by_id("portfolio_det_depo")
@@ -175,8 +180,8 @@ def _investment(driver, a):
                 })
     # // cash teble
     # // investment table
-    cash_table = driver.find_element_by_id("portfolio_det_eq")
-    body = cash_table.find_element_by_tag_name("tbody")
+    inv_table = driver.find_element_by_id("portfolio_det_eq")
+    body = inv_table.find_element_by_tag_name("tbody")
     for tr in body.find_elements_by_tag_name("tr"):
         tds = tr.find_elements_by_tag_name("td")
         result_list.append({
@@ -188,7 +193,7 @@ def _investment(driver, a):
                 })
     return result_list
 
-def investments(driver, args=None):
+def _mk_account_list(driver, atype=""):
     account_list = []
     try:
       driver.get("https://moneyforward.com/")
@@ -198,8 +203,6 @@ def investments(driver, args=None):
           if li.get_attribute("class") == "heading-category-name heading-normal":
               account_type = li.text
           elif li.get_attribute("class") == "account facilities-column border-bottom-dotted":
-              if account_type != "証券":
-                  continue
               account_name = li.find_element_by_tag_name("a").text
               show_href = li.find_elements_by_tag_name("a")[0].get_attribute("href")
               account_id = show_href.split("/show/")[1]
@@ -211,11 +214,15 @@ def investments(driver, args=None):
                       "amount": amount
                       }
               account_list.append(_dict)
+      return account_list  
     except ValueError:
         return None
+def investments(driver, args=None):
+    account_list = _mk_account_list(driver)
     result_list = []
     for a in account_list:
-        result_list.extend(_investment(driver, a))
+        if a["account_type"] == "証券":
+            result_list.extend(_investment(driver, a))
     return result_list
 
 def add(driver, args):
