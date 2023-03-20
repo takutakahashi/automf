@@ -186,16 +186,32 @@ def investments(driver, args=None):
     for a in account_list:
         a["details"] = []
         driver.get("https://moneyforward.com/accounts/show/{}".format(a["account_id"]))
-        investment_table = driver.find_element_by_css_selector(".table.table-bordered.table-mf")
-        body = investment_table.find_element_by_tag_name("tbody")
+        # cash table
+        cash_table = driver.find_element_by_id("portfolio_det_depo")
+        body = cash_table.find_element_by_tag_name("tbody")
         for tr in body.find_elements_by_tag_name("tr"):
             tds = tr.find_elements_by_tag_name("td")
             result_list.append({
                     "account_id": a["account_id"],
                     "name": a["name"],
                     "type": tds[0].text,
-                    "amount": -to_yen(tds[6].text),
+                    "profit": 0,
+                    "amount": to_yen(tds[1].text),
                     })
+        # // cash teble
+        # // investment table
+        cash_table = driver.find_element_by_id("portfolio_det_eq")
+        body = cash_table.find_element_by_tag_name("tbody")
+        for tr in body.find_elements_by_tag_name("tr"):
+            tds = tr.find_elements_by_tag_name("td")
+            result_list.append({
+                    "account_id": a["account_id"],
+                    "name": a["name"],
+                    "type": tds[0].text,
+                    "profit": to_yen(tds[7].text),
+                    "amount": to_yen(tds[5].text),
+                    })
+        # // investment table
     return result_list
 
 def add(driver, args):
