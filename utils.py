@@ -167,30 +167,46 @@ def _investment(driver, a):
     result_list = []
     driver.get("https://moneyforward.com/accounts/show/{}".format(a["account_id"]))
     # cash table
-    cash_table = driver.find_element_by_id("portfolio_det_depo")
-    body = cash_table.find_element_by_tag_name("tbody")
-    for tr in body.find_elements_by_tag_name("tr"):
-        tds = tr.find_elements_by_tag_name("td")
-        result_list.append({
-                "account_id": a["account_id"],
-                "name": a["name"],
-                "type": tds[0].text,
-                "profit": 0,
-                "amount": to_yen(tds[1].text),
-                })
+    if len(driver.find_elements_by_id("portfolio_det_depo")) > 0:
+        cash_table = driver.find_element_by_id("portfolio_det_depo")
+        body = cash_table.find_element_by_tag_name("tbody")
+        for tr in body.find_elements_by_tag_name("tr"):
+            tds = tr.find_elements_by_tag_name("td")
+            result_list.append({
+                    "account_id": a["account_id"],
+                    "name": a["name"],
+                    "type": tds[0].text,
+                    "profit": 0,
+                    "amount": to_yen(tds[1].text),
+                    })
     # // cash teble
     # // investment table
-    inv_table = driver.find_element_by_id("portfolio_det_eq")
-    body = inv_table.find_element_by_tag_name("tbody")
-    for tr in body.find_elements_by_tag_name("tr"):
-        tds = tr.find_elements_by_tag_name("td")
-        result_list.append({
-                "account_id": a["account_id"],
-                "name": a["name"],
-                "type": tds[0].text,
-                "profit": to_yen(tds[7].text),
-                "amount": to_yen(tds[5].text),
-                })
+    if len(driver.find_elements_by_id("portfolio_det_eq")) > 0:
+        inv_table = driver.find_element_by_id("portfolio_det_eq")
+        body = inv_table.find_element_by_tag_name("tbody")
+        for tr in body.find_elements_by_tag_name("tr"):
+            tds = tr.find_elements_by_tag_name("td")
+            result_list.append({
+                    "account_id": a["account_id"],
+                    "name": a["name"],
+                    "type": tds[0].text,
+                    "profit": to_yen(tds[7].text),
+                    "amount": to_yen(tds[5].text),
+                    })
+    # mf table
+    if len(driver.find_elements_by_id("portfolio_det_mf")) > 0:
+        inv_table = driver.find_element_by_id("portfolio_det_mf")
+        body = inv_table.find_element_by_tag_name("tbody")
+        for tr in body.find_elements_by_tag_name("tr"):
+            tds = tr.find_elements_by_tag_name("td")
+            result_list.append({
+                    "account_id": a["account_id"],
+                    "name": a["name"],
+                    "type": tds[0].text,
+                    "profit": to_yen(tds[6].text),
+                    "amount": to_yen(tds[4].text),
+                    })
+    # mf table
     return result_list
 
 def _mk_account_list(driver, atype=""):
