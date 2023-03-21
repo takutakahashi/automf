@@ -175,7 +175,7 @@ def _investment(driver, a):
             result_list.append({
                     "account_id": a["account_id"],
                     "name": a["name"],
-                    "type": "銀行: {}".format(tds[0].text),
+                    "type": "銀行",
                     "profit": 0,
                     "amount": to_yen(tds[1].text),
                     })
@@ -189,7 +189,8 @@ def _investment(driver, a):
             result_list.append({
                     "account_id": a["account_id"],
                     "name": a["name"],
-                    "type": "{}: {}".format(a["type"], tds[0].text),
+                    "type": a["type"],
+                    "ticker": tds[0].text,
                     "profit": to_yen(tds[7].text),
                     "amount": to_yen(tds[5].text),
                     })
@@ -202,7 +203,8 @@ def _investment(driver, a):
             result_list.append({
                     "account_id": a["account_id"],
                     "name": a["name"],
-                    "type": "{}: {}".format(a["type"], tds[0].text),
+                    "type": a["type"],
+                    "ticker": tds[0].text,
                     "profit": to_yen(tds[6].text),
                     "amount": to_yen(tds[4].text),
                     })
