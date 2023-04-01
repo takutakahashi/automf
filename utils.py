@@ -153,6 +153,7 @@ def _balance(driver, args=None, index=1):
           h1s = [h for h in driver.find_elements_by_tag_name("h1") if h.text[:4] == "負債総額"]
           if len(h1s) == 1:
               a["amount"] = int(h1s[0].text.split(" ")[1].replace(",","").replace("円", ""))
+              result_account_list.append(a)
               continue
           a["amount"] = int(driver.find_element_by_id("TABLE_3").find_element_by_class_name("number").text.replace(",","").replace("円", ""))
       else:
