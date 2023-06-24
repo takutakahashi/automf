@@ -7,6 +7,8 @@ import re
 import os
 
 def to_sub(s):
+    if len(re.findall("[-\d,.]+",s)) == 2:
+        return re.findall("[-\d,.]+",s)[1]
     return re.match("[-\d,.]+",s).group()
 
 def to_yen(s):
@@ -32,13 +34,13 @@ def login(user, password, force_reload=False):
     # login
     elem = driver.find_element_by_css_selector(".ssoText")
     elem.click()
-    elem = driver.find_element_by_css_selector(".inputItem")
+    elem = driver.find_element_by_name("mfid_user[email]")
     elem.clear()
     elem.send_keys(user)
     debug("email sent")
     elem = driver.find_element_by_css_selector(".submitBtn.homeDomain")
     elem.click()
-    elem = driver.find_element_by_css_selector(".inputItem")
+    elem = driver.find_element_by_name("mfid_user[password]")
     debug("password sent")
     elem.clear()
     elem.send_keys(password)
@@ -58,13 +60,13 @@ def set_group(driver, group=None):
     driver.get("https://moneyforward.com/")
     s = driver.find_element_by_id("group_id_hash")
     s.click()
-    [o for o in s.find_elements_by_tag_name("option") if group == o.text].pop().click()
+    [o for o in s.find_elements_by_tag_name("option") if group == o.get_attribute("innerHTML")].pop().click()
     return
 
 def reload(driver, args=None):
     driver.get("https://moneyforward.com/")
     for e in driver.find_elements_by_css_selector(".refresh.btn.icon-refresh"):
-        if e.text == "一括更新":
+        if e.get_attribute("innerHTML") == "一括更新":
             e.click()
             debug("reload clicked")
     return
@@ -76,14 +78,14 @@ def _portfolio(driver, account_id):
 
     theader = portfolio_section.find_element_by_tag_name("thead").find_elements_by_tag_name("th")
     tbody = portfolio_section.find_element_by_tag_name("tbody").find_elements_by_tag_name("tr")
-    header = [t.text for t in theader]
-    return [ { header[i]: content.text for i, content in enumerate(t.find_elements_by_tag_name("td"))} for t in tbody]
+    header = [t.get_attribute("innerHTML") for t in theader]
+    return [ { header[i]: content.get_attribute("innerHTML") for i, content in enumerate(t.find_elements_by_tag_name("td"))} for t in tbody]
 
 def _detail(driver, account_name):
   driver.get("https://moneyforward.com/")
   l = driver.find_elements_by_css_selector(".facilities.accounts-list")[0]
   for li in l.find_elements_by_tag_name('li'):
-      if li.get_attribute("class") == "account facilities-column border-bottom-dotted" and li.find_element_by_tag_name("a").text == account_name:
+      if li.get_attribute("class") == "account facilities-column border-bottom-dotted" and li.find_element_by_tag_name("a").get_attribute("innerHTML") == account_name:
           show_href = li.find_elements_by_tag_name("a")[0].get_attribute("href")
           return show_href
 
@@ -93,9 +95,9 @@ def clean(driver, args):
     if None in [member, amount_delta]:
         return False
     driver.get(_detail(driver, member))
-    [b for b in driver.find_elements_by_css_selector(".btn.btn-success") if b.text == "残高修正"].pop().click()
+    [b for b in driver.find_elements_by_css_selector(".btn.btn-success") if b.get_attribute("innerHTML") == "残高修正"].pop().click()
     sleep(2)
-    a_str = driver.find_element_by_css_selector("span.control-label").text[:-1]
+    a_str = driver.find_element_by_css_selector("span.control-label").get_attribute("innerHTML")[:-1]
     before_amount = int(a_str)
     if before_amount >= 0:
         amount = before_amount - int(amount_delta)
@@ -126,15 +128,18 @@ def _balance(driver, args=None, index=1):
     l = driver.find_elements_by_css_selector(".facilities.accounts-list")[index]
     for li in l.find_elements_by_tag_name('li'):
         if li.get_attribute("class") == "heading-category-name heading-normal":
-            account_type = li.text
+            account_type = li.get_attribute("innerHTML")
+            debug("set account_type")
+            debug(account_type)
         elif li.get_attribute("class") == "account facilities-column border-bottom-dotted":
-            account_name = li.find_element_by_tag_name("a").text
+            account_name = li.find_element_by_tag_name("a").get_attribute("innerHTML")
+            debug(account_name)
             show_href = li.find_elements_by_tag_name("a")[0].get_attribute("href")
             account_id = show_href.split(delimiter[index])[1]
             if account_type == "カード":
                 amount = show_href
             else:
-                amount = li.find_element_by_class_name("number").text
+                amount = li.find_element_by_class_name("number").get_attribute("innerHTML")
             _dict = {
                     "account_id": account_id,
                     "name": account_name,
@@ -143,6 +148,7 @@ def _balance(driver, args=None, index=1):
                     "profit": 0
                     }
             account_list.append(_dict)
+            debug(account_list)
 
   except ValueError:
       return None
@@ -150,12 +156,13 @@ def _balance(driver, args=None, index=1):
   for a in account_list:
       if a["amount"][:4] == 'http':
           driver.get(a["amount"])
-          h1s = [h for h in driver.find_elements_by_tag_name("h1") if h.text[:4] == "負債総額"]
+          h1s = [h for h in driver.find_elements_by_tag_name("h1") if h.get_attribute("innerHTML")[:4] == "負債総額"]
           if len(h1s) == 1:
-              a["amount"] = int(h1s[0].text.split(" ")[1].replace(",","").replace("円", ""))
+              debug(h1s[0].get_attribute("innerHTML"))
+              a["amount"] = int(h1s[0].get_attribute("innerHTML").split("\n")[1].replace(",","").replace("円", ""))
               result_account_list.append(a)
               continue
-          a["amount"] = int(driver.find_element_by_id("TABLE_3").find_element_by_class_name("number").text.replace(",","").replace("円", ""))
+          a["amount"] = int(driver.find_element_by_id("TABLE_3").find_element_by_class_name("number").get_attribute("innerHTML").replace(",","").replace("円", ""))
       else:
           a["amount"] = int(a["amount"].replace(",","").replace("円", ""))
       if a["type"] == "証券":
@@ -178,7 +185,7 @@ def _investment(driver, a):
                     "name": a["name"],
                     "type": "銀行",
                     "profit": 0,
-                    "amount": to_yen(tds[1].text),
+                    "amount": to_yen(tds[1].get_attribute("innerHTML")),
                     })
     # // cash teble
     # // investment table
@@ -191,9 +198,9 @@ def _investment(driver, a):
                     "account_id": a["account_id"],
                     "name": a["name"],
                     "type": a["type"],
-                    "ticker": tds[0].text,
-                    "profit": to_yen(tds[7].text),
-                    "amount": to_yen(tds[5].text),
+                    "ticker": tds[0].get_attribute("innerHTML"),
+                    "profit": to_yen(tds[7].get_attribute("innerHTML")),
+                    "amount": to_yen(tds[5].get_attribute("innerHTML")),
                     })
     # mf table
     if len(driver.find_elements_by_id("portfolio_det_mf")) > 0:
@@ -205,9 +212,9 @@ def _investment(driver, a):
                     "account_id": a["account_id"],
                     "name": a["name"],
                     "type": a["type"],
-                    "ticker": tds[0].text,
-                    "profit": to_yen(tds[6].text),
-                    "amount": to_yen(tds[4].text),
+                    "ticker": tds[0].get_attribute("innerHTML"),
+                    "profit": to_yen(tds[6].get_attribute("innerHTML")),
+                    "amount": to_yen(tds[4].get_attribute("innerHTML")),
                     })
     # mf table
     return result_list
@@ -220,12 +227,12 @@ def _mk_account_list(driver, atype=""):
       l = driver.find_elements_by_css_selector(".facilities.accounts-list")[1]
       for li in l.find_elements_by_tag_name('li'):
           if li.get_attribute("class") == "heading-category-name heading-normal":
-              account_type = li.text
+              account_type = li.get_attribute("innerHTML")
           elif li.get_attribute("class") == "account facilities-column border-bottom-dotted":
-              account_name = li.find_element_by_tag_name("a").text
+              account_name = li.find_element_by_tag_name("a").get_attribute("innerHTML")
               show_href = li.find_elements_by_tag_name("a")[0].get_attribute("href")
               account_id = show_href.split("/show/")[1]
-              amount = li.find_element_by_class_name("number").text
+              amount = li.find_element_by_class_name("number").get_attribute("innerHTML")
               _dict = {
                       "account_id": account_id,
                       "name": account_name,
@@ -274,13 +281,13 @@ def add(driver, args):
     debug("ammount sent")
     s = driver.find_element_by_id("user_asset_act_sub_account_id_hash")
     s.click()
-    [opt for opt in s.find_elements_by_tag_name("option") if member in opt.text].pop().click()
+    [opt for opt in s.find_elements_by_tag_name("option") if member in opt.get_attribute("innerHTML")].pop().click()
     driver.find_element_by_id("js-large-category-selected").click()
     li = driver.find_element_by_css_selector(category_type)
-    [a for a in li.find_elements_by_class_name("l_c_name") if a.text == large_item].pop().click()
+    [a for a in li.find_elements_by_class_name("l_c_name") if a.get_attribute("innerHTML") == large_item].pop().click()
     driver.find_element_by_id("js-middle-category-selected").click()
     li = driver.find_element_by_css_selector(".dropdown-menu.sub_menu")
-    [a for a in li.find_elements_by_class_name("m_c_name") if a.text == middle_item].pop().click()
+    [a for a in li.find_elements_by_class_name("m_c_name") if a.get_attribute("innerHTML") == middle_item].pop().click()
     debug("category selected")
     driver.find_element_by_id("js-content-field").send_keys("[{}] {}".format(member, comment))
     debug("comment sent")
