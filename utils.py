@@ -32,8 +32,6 @@ def login(user, password, force_reload=False):
     driver.get(surl)
   
     # login
-    elem = driver.find_element_by_css_selector(".ssoText")
-    elem.click()
     elem = driver.find_element_by_name("mfid_user[email]")
     elem.clear()
     elem.send_keys(user)
